@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Calculadora</title>
+    <style>
+        body { font-family: sans-serif; max-width: 480px; margin: 40px auto; padding: 0 16px; }
+        .card { border: 1px solid #ccc; border-radius: 8px; padding: 16px; margin-bottom: 20px; }
+        input { padding: 6px; width: 60%; }
+        button { padding: 6px 12px; cursor: pointer; }
+        .ok { color: green; }
+        .error { color: red; }
+    </style>
+</head>
+<body>
+    <h1>Calculadora</h1>
+
+    <div class="card">
+        <h3>¿Es palíndromo?</h3>
+        <input id="palabra" value="reconocer">
+        <button onclick="consultar('palindrome', 'palabra', 'resPalindromo')">Revisar</button>
+        <p id="resPalindromo"></p>
+    </div>
+
+    <div class="card">
+        <h3>Factorial</h3>
+        <input id="numero" value="5">
+        <button onclick="consultar('factorial', 'numero', 'resFactorial')">Calcular</button>
+        <p id="resFactorial"></p>
+    </div>
+
+    <script>
+        // operacion: "palindrome" o "factorial"
+        // idInput: de qué cajita leer el valor
+        // idResultado: dónde mostrar la respuesta
+        async function consultar(operacion, idInput, idResultado) {
+            const valor = document.getElementById(idInput).value;
+            const salida = document.getElementById(idResultado);
+
+            try {
+                // Le pregunta AL PROXY (misma dirección de la página), no al backend.
+                // encodeURIComponent convierte espacios y tildes para que viajen bien en la URL.
+                const respuesta = await fetch("/" + operacion + "?value=" + encodeURIComponent(valor));
+                const datos = await respuesta.json();   // convierte el texto JSON en objeto
+
+                if (respuesta.ok) {
+                    salida.className = "ok";
+                    salida.textContent = "Resultado: " + datos.output;
+                } else {
+                    salida.className = "error";
+                    salida.textContent = "Error: " + datos.error;
+                }
+            } catch (e) {
+                salida.className = "error";
+                salida.textContent = "No se pudo contactar al servidor";
+            }
+        }
+    </script>
+</body>
+</html>
